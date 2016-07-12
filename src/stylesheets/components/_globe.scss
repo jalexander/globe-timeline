@@ -1,0 +1,58 @@
+.map-tooltip {
+  position: absolute;
+  z-index: 5;
+
+  display: block;
+
+  box-sizing: border-box;
+  padding: 10px;
+
+  transition: 0.5s opacity ease;
+  text-align: center;
+  text-transform: uppercase;
+
+  opacity: 0;
+  background: rgba(70, 70, 70, 0.9);
+
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  transform: translateX(-50%) translateY(-130%);
+  pointer-events: none;
+
+  &:after {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+
+    width: 0;
+    height: 0;
+    margin-left: -10px;
+
+    content: " ";
+    pointer-events: none;
+
+    opacity: 0.9;
+    border: solid transparent;
+    border-width: 10px;
+    border-color: rgba(145, 52, 10, 0);
+    border-top-color: #464646;
+  }
+
+  &.is-active {
+    transform: translateX(-50%) translateY(-125%);
+
+    opacity: 0.9;
+  }
+}
+
+.map-tooltip__date {
+  white-space: nowrap;
+
+  opacity: 0.4;
+  color: $white;
+}
+
+.map-tooltip__title {
+  white-space: nowrap;
+
+  color: $white;
+}

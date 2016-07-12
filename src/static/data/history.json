@@ -1,0 +1,72 @@
+[
+  {
+    "year": 1517,
+    "title": "The Reformation",
+    "lat": 51.1461323,
+    "lon": 8.212168,
+    "location": "Germany"
+  },
+  {
+    "year": 1775,
+    "title": "The American Revolution begins",
+    "lat": 38.0285173,
+    "lon": -84.6116463,
+    "location": "Lexington"
+  },
+  {
+    "year": 1903,
+    "title": "Orville and Wilbur Wright fly a powered airplane",
+    "lat": 36.0710729,
+    "lon": -75.7302107,
+    "location": "Kitty Hawk"
+  },
+  {
+    "year": 1908,
+    "title": "Tunguska Event",
+    "lat": 60,
+    "lon": 101,
+    "location": "Siberia"
+  },
+  {
+    "year": 1912,
+    "title": "The Sinking of the Titanic",
+    "lat": 41.7325,
+    "lon": -49.9469,
+    "location": "North Atlantic Ocean"
+  },
+  {
+    "year": 1914,
+    "title": "World War I begins",
+    "lat": 43.8937798,
+    "lon": 18.3479724,
+    "location": "Sarajevo, Bosnia"
+  },
+  {
+    "year": 1929,
+    "title": "U.S. Stock Market collapses",
+    "lat": 40.706881,
+    "lon": -74.0134541,
+    "location": "New York City"
+  },
+  {
+    "year": 1939,
+    "title": "World War II begins",
+    "lat": 51.900994,
+    "lon": 16.8924648,
+    "location": "Poland"
+  },
+  {
+    "year": 1942,
+    "title": "Manhattan Project",
+    "lat": 35.891956,
+    "lon": -106.3075507,
+    "location": "Los Alamos, New Mexico"
+  },
+  {
+    "year": 1979,
+    "title": "Three Mile Island nuclear incident",
+    "lat": 40.3723182,
+    "lon": -76.8167154,
+    "location": "Dauphin County, Pennsylvania"
+  }
+]

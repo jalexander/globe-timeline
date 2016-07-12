@@ -1,0 +1,57 @@
+/**
+ * SCAFFOLDING
+ * ==========================================================================
+ */
+html {
+  font: #{($font-size-base/16px)*1em}/#{$line-height-ratio} $font-family-base;
+  width: 100%;
+  height: 100%;
+
+  background: repeating-linear-gradient(45deg, #EEEDE8, #EEEDE8 18px, lighten(#DCDBD8, 10%) 10px, lighten(#DCDBD8, 10%) 19px);
+}
+
+body {
+  overflow: hidden;
+
+  width: 100%;
+  height: 100%;
+
+  letter-spacing: 0.06em;
+
+  font-family: $oswald;
+  font-weight: 400;
+
+  @include font-smoothing();
+  @include font-size(16px, false);
+}
+
+* {
+  &,
+  &:before,
+  &:after {
+    box-sizing: border-box;
+  }
+}
+
+main {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+}
+
+.container {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+
+  margin: -454px 0 0 -464px;
+
+  border: 3px dotted $gray-medium;
+  border-radius: 50%;
+
+  @-moz-document url-prefix() {
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+}

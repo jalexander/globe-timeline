@@ -1,0 +1,25 @@
+/**
+ * MIXINS
+ * ==========================================================================
+ */
+
+/**
+ * Font Size
+ * --------------------------------------------------------------------------
+ */
+@mixin font-size($font-size, $line-height:true) {
+    font-size:$font-size;
+    font-size:($font-size / $font-size-base)*1rem;
+    @if $line-height == true {
+        line-height:ceil($font-size / $line-height-base) * ($line-height-base / $font-size);
+    }
+}
+
+/**
+* Font Smoothing
+* --------------------------------------------------------------------------
+*/
+@mixin font-smoothing() {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}

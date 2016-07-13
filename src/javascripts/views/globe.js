@@ -49,22 +49,7 @@ const GlobeView = Backbone.View.extend({
     this.padding = 40;
     this.PI_HALF = Math.PI / 2;
 
-    this.aspectRatio = 928 / 908;
-
-    if (window.innerWidth < 1514) {
-      this.w = window.innerWidth - 50;
-      this.h = this.w + this.aspectRatio;
-    } else {
-      this.h = window.innerHeight + 180;
-      this.w = this.h * this.aspectRatio;
-    }
-
-    this.$el.css({
-      height: this.h,
-      width: this.w,
-      marginTop: `-${(this.h / 2)}px`,
-      marginLeft: `-${(this.w / 2)}px`,
-    });
+    this.setStageSize();
 
     this.camera = new THREE.PerspectiveCamera(25, this.w / this.h, 1, 10000);
     this.camera.position.z = this.distance;
@@ -102,6 +87,26 @@ const GlobeView = Backbone.View.extend({
     this.mouseVector = new THREE.Vector3();
     this.intersects = [];
     this.clickInfo = {};
+  },
+
+  setStageSize() {
+    const originalWidth = 928;
+    const originalHeight = 908;
+
+    const ratio = Math.min(
+      (window.innerWidth - 50) / originalWidth,
+      (window.innerHeight + 150) / originalHeight
+    );
+
+    this.w = Math.ceil(originalWidth * ratio);
+    this.h = Math.ceil(originalHeight * ratio);
+
+    this.$el.css({
+      height: this.h,
+      width: this.w,
+      marginTop: `-${(this.h / 2)}px`,
+      marginLeft: `-${(this.w / 2)}px`,
+    });
   },
 
   addMarkers() {
@@ -252,20 +257,7 @@ const GlobeView = Backbone.View.extend({
   },
 
   resize() {
-    if (window.innerWidth < 1514) {
-      this.w = window.innerWidth - 50;
-      this.h = this.w + this.aspectRatio;
-    } else {
-      this.h = window.innerHeight + 180;
-      this.w = this.h * this.aspectRatio;
-    }
-
-    this.$el.css({
-      height: this.h,
-      width: this.w,
-      marginTop: `-${(this.h / 2)}px`,
-      marginLeft: `-${(this.w / 2)}px`,
-    });
+    this.setStageSize();
 
     this.renderer.setSize(this.w, this.h);
   },

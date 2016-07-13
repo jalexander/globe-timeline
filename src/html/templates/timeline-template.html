@@ -1,0 +1,19 @@
+<script type="text/template" id="timeline-template">
+  <div class="timeline">
+    <div class="timeline__items">
+      <% collection.each(function(model, index) { %>
+      <div class="timeline__item" data-index="<%= index %>" data-cid="<%= model.cid %>">
+        <div class="timeline__item__info">
+          <p class="timeline__item__date"><%= model.get('year') %></p>
+          <p class="timeline__item__title"><%= model.get('title') %></p>
+        </div>
+        <p class="timeline-tooltip">
+          <span class="timeline-tooltip__date"><%= model.get('year') %> - </span><span class="timeline-tooltip__location"><%= model.get('location') %></span>
+        </p>
+      </div>
+      <% }); %>
+    </div>
+    <button class="timeline-arrow timeline-arrow--prev"></button>
+    <button class="timeline-arrow timeline-arrow--next"></button>
+  </div>
+</script>

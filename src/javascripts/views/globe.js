@@ -4,8 +4,29 @@ import Backbone from 'backbone';
 import THREE from 'three';
 import 'imports?$=jquery!slick-carousel';
 
+const ORIGINAL_WIDTH = 928;
+const ORIGINAL_HEIGHT = 908;
+
 const GlobeView = Backbone.View.extend({
   el: '.container',
+
+  events: {
+    mousedown: 'onMouseDown',
+    mousemove: 'onMouseOver',
+  },
+
+  mouse: { x: 0, y: 0, z: 1 },
+  mouseOnDown: { x: 0, y: 0 },
+  rotation: { x: Math.PI * 3 / 2, y: Math.PI / 8 },
+  target: { x: Math.PI * 3 / 2, y: Math.PI / 8 },
+  targetOnDown: { x: 0, y: 0 },
+  distance: 100000,
+  distanceTarget: 100000,
+  scene: new THREE.Scene(),
+  ray: new THREE.Raycaster(),
+  mouseVector: new THREE.Vector3(),
+  intersects: [],
+  $mapTooltip: $('.map-tooltip'),
 
   initialize() {
     _.bindAll(this,
@@ -15,7 +36,6 @@ const GlobeView = Backbone.View.extend({
       'onMouseOver',
       'onMouseMove',
       'onMouseUp',
-      'onMouseOut',
       'moveToPoint',
       'resize',
       'zoom',
@@ -39,36 +59,24 @@ const GlobeView = Backbone.View.extend({
   },
 
   setupScene() {
-    this.mouse = { x: 0, y: 0 };
-    this.mouseOnDown = { x: 0, y: 0 };
-    this.rotation = { x: Math.PI * 3 / 2, y: Math.PI / 8 };
-    this.target = { x: Math.PI * 3 / 2, y: Math.PI / 8 };
-    this.targetOnDown = { x: 0, y: 0 };
-    this.distance = 100000;
-    this.distanceTarget = 100000;
-    this.padding = 40;
-    this.PI_HALF = Math.PI / 2;
-
     this.setStageSize();
 
     this.camera = new THREE.PerspectiveCamera(25, this.w / this.h, 1, 10000);
     this.camera.position.z = this.distance;
 
-    this.scene = new THREE.Scene();
-
-    const globeGeometry = new THREE.SphereGeometry(200, 64, 64);
-
     const globeMaterial = new THREE.MeshBasicMaterial();
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load('./images/world.png');
 
-    globeMaterial.map = textureLoader.load('./images/world.png');
+    globeMaterial.map = new THREE.TextureLoader().load('./images/world.png');
     globeMaterial.fog = false;
 
-    this.globeMesh = new THREE.Mesh(globeGeometry, globeMaterial);
+    this.globeMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(200, 64, 64),
+      globeMaterial
+    );
     this.globeMesh.rotation.y = Math.PI;
     this.globeMesh.isGlobe = true;
     this.scene.add(this.globeMesh);
+    this.pointsArray = [this.globeMesh];
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(this.w, this.h);
@@ -76,30 +84,16 @@ const GlobeView = Backbone.View.extend({
     this.renderer.domElement.style.position = 'absolute';
 
     this.$el.append(this.renderer.domElement);
-
-    this.$el.on('mousedown', this.onMouseDown);
-    this.$el.on('mousemove', this.onMouseOver);
-
-    this.pointsArray = [this.globeMesh];
-
-    this.mouse2 = { x: 0, y: 0, z: 1 };
-    this.ray = new THREE.Raycaster();
-    this.mouseVector = new THREE.Vector3();
-    this.intersects = [];
-    this.clickInfo = {};
   },
 
   setStageSize() {
-    const originalWidth = 928;
-    const originalHeight = 908;
-
     const ratio = Math.min(
-      (window.innerWidth - 50) / originalWidth,
-      (window.innerHeight + 150) / originalHeight
+      (window.innerWidth - 50) / ORIGINAL_WIDTH,
+      (window.innerHeight + 150) / ORIGINAL_HEIGHT
     );
 
-    this.w = Math.ceil(originalWidth * ratio);
-    this.h = Math.ceil(originalHeight * ratio);
+    this.w = Math.ceil(ORIGINAL_WIDTH * ratio);
+    this.h = Math.ceil(ORIGINAL_HEIGHT * ratio);
 
     this.$el.css({
       height: this.h,
@@ -112,22 +106,20 @@ const GlobeView = Backbone.View.extend({
   addMarkers() {
     const firstModel = this.collection.first();
 
-    this.rotation.x = - Math.PI / 2 + (firstModel.get('lon') * Math.PI / 180);
-    this.rotation.y = firstModel.get('lat') * Math.PI / 180;
-    this.target.x = - Math.PI / 2 + (firstModel.get('lon') * Math.PI / 180);
-    this.target.y = firstModel.get('lat') * Math.PI / 180;
+    this.rotation.x = this.target.x = - Math.PI / 2 + (firstModel.get('lon') * Math.PI / 180);
+    this.rotation.y = this.target.y = firstModel.get('lat') * Math.PI / 180;
     this.animate();
-    this.collection.each(journeyModel => {
-      this.addMarker(journeyModel);
+    this.collection.each(model => {
+      this.addMarker(model);
     });
 
     const activeModel = this.collection.first();
     this.activeModelCid = activeModel.cid;
   },
 
-  addMarker(journeyModel) {
-    const phi = (90 - journeyModel.get('lat')) * Math.PI / 180;
-    const theta = (180 - journeyModel.get('lon')) * Math.PI / 180;
+  addMarker(model) {
+    const phi = (90 - model.get('lat')) * Math.PI / 180;
+    const theta = (180 - model.get('lon')) * Math.PI / 180;
     const geometry = new THREE.SphereGeometry(2, 32, 32);
     const material = new THREE.MeshBasicMaterial({
       color: 0x607D8B,
@@ -139,7 +131,7 @@ const GlobeView = Backbone.View.extend({
     marker.position.x = 200 * Math.sin(phi) * Math.cos(theta);
     marker.position.y = 200 * Math.cos(phi);
     marker.position.z = 200 * Math.sin(phi) * Math.sin(theta);
-    marker.modelId = journeyModel.cid;
+    marker.modelId = model.cid;
 
     this.scene.add(marker);
     this.pointsArray.push(marker);
@@ -148,9 +140,9 @@ const GlobeView = Backbone.View.extend({
   onMouseDown(event) {
     event.preventDefault();
 
-    this.$el.on('mousemove', this.onMouseMove);
-    this.$el.on('mouseup', this.onMouseUp);
-    this.$el.on('mouseout', this.onMouseOut);
+    this.$el
+      .on('mousemove', this.onMouseMove)
+      .on('mouseup', this.onMouseUp);
 
     this.mouseOnDown.x = - event.clientX;
     this.mouseOnDown.y = event.clientY;
@@ -166,11 +158,10 @@ const GlobeView = Backbone.View.extend({
   onMouseOver(event) {
     const x = event.pageX - this.$el.offset().left;
     const y = event.pageY - this.$el.offset().top;
-    const $mapTooltip = $('.map-tooltip');
 
-    this.mouse2.x = (x / this.w) * 2 - 1;
-    this.mouse2.y = - (y / this.h) * 2 + 1;
-    this.mouseVector.set(this.mouse2.x, this.mouse2.y, this.mouse2.z);
+    this.mouse.x = (x / this.w) * 2 - 1;
+    this.mouse.y = - (y / this.h) * 2 + 1;
+    this.mouseVector.set(this.mouse.x, this.mouse.y, this.mouse.z);
 
     this.ray.setFromCamera(this.mouseVector, this.camera);
     this.intersects = this.ray.intersectObjects(this.pointsArray);
@@ -180,55 +171,41 @@ const GlobeView = Backbone.View.extend({
       this.activeModelCid !== this.intersects[0].object.modelId) {
       this.$el.css('cursor', 'pointer');
       const currentMarkerModel = this.collection.get(this.intersects[0].object.modelId);
-      $mapTooltip.find('.map-tooltip__date')
+      this.$mapTooltip.find('.map-tooltip__date')
         .text(`${currentMarkerModel.get('year')}-${currentMarkerModel.get('location')}`);
 
-      $mapTooltip.find('.map-tooltip__title').text(currentMarkerModel.get('title'));
+      this.$mapTooltip.find('.map-tooltip__title').text(currentMarkerModel.get('title'));
 
-      $mapTooltip.css({
+      this.$mapTooltip.css({
         left: event.pageX,
         top: event.pageY,
       }).addClass('is-active');
     } else {
       this.$el.css({ cursor: 'default' });
-      $mapTooltip.removeClass('is-active');
+      this.$mapTooltip.removeClass('is-active');
     }
   },
 
   onMouseMove(event) {
-    this.mouse.x = - event.clientX;
-    this.mouse.y = event.clientY;
+    if (this.intersects[0] && this.intersects[0].object.isGlobe) {
+      this.mouse.x = - event.clientX;
+      this.mouse.y = event.clientY;
 
-    const zoomDamp = this.distance / 1000;
+      const zoomDamp = this.distance / 1000;
 
-    this.target.x = this.targetOnDown.x + (this.mouse.x - this.mouseOnDown.x) * 0.005 * zoomDamp;
-    this.target.y = this.targetOnDown.y + (this.mouse.y - this.mouseOnDown.y) * 0.005 * zoomDamp;
+      this.target.x = this.targetOnDown.x + (this.mouse.x - this.mouseOnDown.x) * 0.005 * zoomDamp;
+      this.target.y = this.targetOnDown.y + (this.mouse.y - this.mouseOnDown.y) * 0.005 * zoomDamp;
 
-    this.target.y = this.target.y > this.PI_HALF ? this.PI_HALF : this.target.y;
-    this.target.y = this.target.y < - this.PI_HALF ? - this.PI_HALF : this.target.y;
-
-    $('.year .active').css({ opacity: 0 });
-    $('.year .timeline-display .date').css({ opacity: 1 });
-    $('.year .timeline-display').css({ color: '#464646' });
-
-    this.$el.css({ cursor: 'move' });
+      this.$el.css({ cursor: 'move' });
+    }
   },
 
-  onMouseUp(event) {
-    this.$el.off('mousemove', this.onMouseMove);
-    this.$el.off('mouseup', this.onMouseUp);
-    this.$el.off('mouseout', this.onMouseOut);
-    this.$el.css('cursor', 'auto');
+  onMouseUp() {
+    this.$el
+      .off('mousemove', this.onMouseMove)
+      .off('mouseup', this.onMouseUp)
+      .css('cursor', 'auto');
 
-    const x = event.pageX - this.$el.offset().left;
-    const y = event.pageY - this.$el.offset().top;
-
-    this.mouse2.x = (x / this.w) * 2 - 1;
-    this.mouse2.y = - (y / this.h) * 2 + 1;
-    this.mouseVector.set(this.mouse2.x, this.mouse2.y, this.mouse2.z);
-
-    this.ray.setFromCamera(this.mouseVector, this.camera);
-    this.intersects = this.ray.intersectObjects(this.pointsArray);
     if (this.intersects[0] && !this.intersects[0].object.isGlobe) {
       if (this.activeModelCid) {
         this.collection.get(this.activeModelCid).set({
@@ -242,23 +219,13 @@ const GlobeView = Backbone.View.extend({
     }
   },
 
-  onMouseOut() {
-    this.$el.off('mousemove', this.onMouseMove);
-    this.$el.off('mouseup', this.onMouseUp);
-    this.$el.off('mouseout', this.onMouseOut);
-  },
-
   moveToPoint(lat, lng) {
-    const phi = lat * Math.PI / 180;
-    const theta = lng * Math.PI / 180;
-
-    this.target.x = - Math.PI / 2 + theta;
-    this.target.y = phi;
+    this.target.x = - Math.PI / 2 + (lng * Math.PI / 180);
+    this.target.y = lat * Math.PI / 180;
   },
 
   resize() {
     this.setStageSize();
-
     this.renderer.setSize(this.w, this.h);
   },
 

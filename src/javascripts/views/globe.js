@@ -100,6 +100,7 @@ const GlobeView = Backbone.View.extend({
       width: this.w,
       marginTop: `-${(this.h / 2)}px`,
       marginLeft: `-${(this.w / 2)}px`,
+      opacity: 1,
     });
   },
 

@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Globe Timeline</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <main>
+    <div class="container"></div>
+		<div class="map-tooltip">
+			<p class="map-tooltip__date"></p>
+			<p class="map-tooltip__title"></p>
+		</div>
+  </main>
+  <script type="text/template" id="timeline-template">
+		<div class="timeline">
+			<div class="timeline__items">
+				<% collection.each(function(model, index) { %>
+				<div class="timeline__item" data-index="<%= index %>" data-cid="<%= model.cid %>">
+					<div class="timeline__item__info">
+						<p class="timeline__item__date"><%= model.get('year') %></p>
+						<p class="timeline__item__title"><%= model.get('title') %></p>
+					</div>
+					<p class="timeline-tooltip">
+						<span class="timeline-tooltip__date"><%= model.get('year') %> - </span><span class="timeline-tooltip__location"><%= model.get('location') %></span>
+					</p>
+				</div>
+				<% }); %>
+			</div>
+			<button class="timeline-arrow timeline-arrow--prev"></button>
+			<button class="timeline-arrow timeline-arrow--next"></button>
+		</div>
+	</script>
+</body>
+</html>

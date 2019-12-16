@@ -46,10 +46,9 @@ main {
   top: 50%;
   left: 50%;
 
-  margin: -454px 0 0 -464px;
-
   border: 3px dotted $gray-medium;
   border-radius: 50%;
+  opacity: 0;
 
   @-moz-document url-prefix() {
     border: 1px solid rgba(0, 0, 0, 0.2);

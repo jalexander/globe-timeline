@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
-import 'imports?$=jquery!slick-carousel';
+import 'slick-carousel';
 
 const TimelineView = Backbone.View.extend({
   el: '.container',

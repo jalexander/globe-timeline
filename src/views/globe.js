@@ -1,8 +1,8 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
-import THREE from 'three';
-import 'imports?$=jquery!slick-carousel';
+import { Scene, Raycaster, Vector3, PerspectiveCamera, MeshBasicMaterial, TextureLoader, Mesh, SphereGeometry, WebGLRenderer } from 'three';
+import worldImage from '../images/world.png';
 
 const ORIGINAL_WIDTH = 928;
 const ORIGINAL_HEIGHT = 908;
@@ -22,9 +22,9 @@ const GlobeView = Backbone.View.extend({
   targetOnDown: { x: 0, y: 0 },
   distance: 100000,
   distanceTarget: 100000,
-  scene: new THREE.Scene(),
-  ray: new THREE.Raycaster(),
-  mouseVector: new THREE.Vector3(),
+  scene: new Scene(),
+  ray: new Raycaster(),
+  mouseVector: new Vector3(),
   intersects: [],
   $mapTooltip: $('.map-tooltip'),
 
@@ -61,16 +61,16 @@ const GlobeView = Backbone.View.extend({
   setupScene() {
     this.setStageSize();
 
-    this.camera = new THREE.PerspectiveCamera(25, this.w / this.h, 1, 10000);
+    this.camera = new PerspectiveCamera(25, this.w / this.h, 1, 10000);
     this.camera.position.z = this.distance;
 
-    const globeMaterial = new THREE.MeshBasicMaterial();
+    const globeMaterial = new MeshBasicMaterial();
 
-    globeMaterial.map = new THREE.TextureLoader().load('./images/world.png');
+    globeMaterial.map = new TextureLoader().load(worldImage);
     globeMaterial.fog = false;
 
-    this.globeMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(200, 64, 64),
+    this.globeMesh = new Mesh(
+      new SphereGeometry(200, 64, 64),
       globeMaterial
     );
     this.globeMesh.rotation.y = Math.PI;
@@ -78,7 +78,7 @@ const GlobeView = Backbone.View.extend({
     this.scene.add(this.globeMesh);
     this.pointsArray = [this.globeMesh];
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer = new WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setSize(this.w, this.h);
 
     this.renderer.domElement.style.position = 'absolute';
@@ -100,6 +100,7 @@ const GlobeView = Backbone.View.extend({
       width: this.w,
       marginTop: `-${(this.h / 2)}px`,
       marginLeft: `-${(this.w / 2)}px`,
+      opacity: 1,
     });
   },
 
@@ -120,13 +121,13 @@ const GlobeView = Backbone.View.extend({
   addMarker(model) {
     const phi = (90 - model.get('lat')) * Math.PI / 180;
     const theta = (180 - model.get('lon')) * Math.PI / 180;
-    const geometry = new THREE.SphereGeometry(2, 32, 32);
-    const material = new THREE.MeshBasicMaterial({
+    const geometry = new SphereGeometry(2, 32, 32);
+    const material = new MeshBasicMaterial({
       color: 0x607D8B,
       transparent: true,
       opacity: 0.5,
     });
-    const marker = new THREE.Mesh(geometry, material);
+    const marker = new Mesh(geometry, material);
 
     marker.position.x = 200 * Math.sin(phi) * Math.cos(theta);
     marker.position.y = 200 * Math.cos(phi);

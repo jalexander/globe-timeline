@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
-import 'imports?$=jquery!slick-carousel';
+import 'slick-carousel';
 
 const TimelineView = Backbone.View.extend({
   el: '.container',
@@ -46,6 +46,8 @@ const TimelineView = Backbone.View.extend({
     } else if (this.collection.length > 7 && this.collection.length <= 9) {
       carouselSlideCount = 7;
     }
+
+    console.log('this.$timeline.find(.timeline__items)', this.$timeline.find('.timeline__items'))
 
     this.$carousel = this.$timeline.find('.timeline__items').slick({
       centerMode: true,

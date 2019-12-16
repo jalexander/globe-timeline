@@ -3,6 +3,8 @@ import GlobeView from './views/globe';
 import TimelineView from './views/timeline';
 import HistoryCollection from './collections/history';
 
+import './styles/main.scss';
+
 class App {
   constructor() {
     this.collection = new HistoryCollection();

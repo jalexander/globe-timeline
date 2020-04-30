@@ -29,7 +29,7 @@
   "dependencies": {
     "backbone": "^1.4.0",
     "es5-shim": "^4.5.13",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "slick-carousel": "^1.8.1",
     "three": "0.78.0",
     "underscore": "^1.9.1"

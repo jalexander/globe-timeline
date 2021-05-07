@@ -32,6 +32,6 @@
     "jquery": "^3.4.1",
     "slick-carousel": "^1.8.1",
     "three": "0.78.0",
-    "underscore": "^1.9.1"
+    "underscore": "^1.12.1"
   }
 }
